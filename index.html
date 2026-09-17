@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Form Wawancara Pemantauan Ikan Jenis Asing Invasif - Sentra Budidaya</title>
+<style>
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:#e0e0e0;
+    color:#000;
+    font-family:"Times New Roman", Times, serif;
+    font-size:11pt;
+    line-height:1.2;
+    padding:20px 10px;
+  }
+
+  .sheet{
+    max-width:800px;
+    margin:0 auto;
+    background:#fff;
+    padding:30px 40px;
+    border:1px solid #ccc;
+  }
+
+  .sec-title{
+    font-weight:bold;
+    font-size:11pt;
+    margin-top:15px;
+    margin-bottom:6px;
+  }
+
+  table.grid-table{
+    width:100%;
+    border-collapse:collapse;
+    margin-bottom:10px;
+  }
+  table.grid-table th, table.grid-table td{
+    border:1px solid #000;
+    padding:5px 6px;
+    font-size:10.5pt;
+    text-align:left;
+    vertical-align:middle;
+  }
+  table.grid-table th{
+    text-align:center;
+    font-weight:bold;
+    background-color:#f2f2f2;
+  }
+  table.grid-table td.center{text-align:center;}
+  
+  input[type="text"], input[type="number"], input[type="date"], textarea, select{
+    border:none;
+    width:100%;
+    padding:2px 0;
+    font-family:"Times New Roman", Times, serif;
+    font-size:10.5pt;
+    background:transparent;
+  }
+  textarea {
+    resize: vertical;
+    min-height: 40px;
+  }
+  select {
+    cursor: pointer;
+  }
+  input:focus, select:focus, textarea:focus{outline:1px solid #666;}
+
+  /* FOTO DOKUMENTASI SIMPLE GRID */
+  .photo-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-top: 10px;
+    margin-bottom: 15px;
+  }
+  .photo-item {
+    width: 220px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .photo-box{
+    width:220px;
+    height:180px;
+    border:1px solid #000;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+    background:#fafafa;
+    cursor:pointer;
+  }
+  .photo-box img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:none;
+  }
+  .photo-box.has-img img{display:block;}
+  .photo-box.has-img .photo-hint{display:none;}
+  .photo-hint{
+    font-size:9pt;
+    color:#666;
+    text-align:center;
+    padding:10px;
+  }
+
+  /* CANVAS TANDA TANGAN */
+  .signature-container {
+    display: inline-block;
+    text-align: center;
+  }
+  .sig-canvas-wrapper {
+    position: relative;
+    border: 1px solid #000;
+    width: 260px;
+    height: 120px;
+    background: #fafafa;
+    margin: 5px auto;
+  }
+  .sig-canvas-wrapper canvas {
+    width: 100%;
+    height: 100%;
+    touch-action: none;
+    cursor: crosshair;
+  }
+
+  .footer-note{
+    font-size:9.5pt;
+    font-style:italic;
+    margin-top:10px;
+  }
+
+  .btn-bar{
+    max-width:800px;
+    margin:15px auto 0;
+    display:flex;
+    gap:8px;
+    justify-content:flex-end;
+  }
+  .btn{
+    padding:8px 16px;
+    font-size:10pt;
+    cursor:pointer;
+    border:1px solid #666;
+    background:#fff;
+  }
+  .btn-primary{
+    background:#333;
+    color:#fff;
+    border-color:#333;
+  }
+  .btn-success{
+    background:#28a745;
+    color:#fff;
+    border-color:#28a745;
+  }
+  .btn-sm{
+    padding:4px 8px;
+    font-size:8.5pt;
+    margin-top:4px;
+  }
+
+  .table-responsive {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  /* POPUP / MODAL DAFTAR DRAF */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-box {
+    background: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    max-width: 600px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  }
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+  }
+  .draft-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border: 1px solid #ddd;
+    margin-bottom: 8px;
+    border-radius: 4px;
+  }
+  .draft-item-info {
+    font-size: 9.5pt;
+  }
+
+  /* Tampilan Layar HP */
+  @media screen and (max-width: 600px) {
+    body{ padding: 5px; }
+    .sheet{ padding: 15px 10px; }
+    
+    input[type="text"], input[type="number"], input[type="date"], textarea, select{
+      border-bottom: 1px dashed #aaa;
+      padding: 4px;
+      margin-top: 2px;
+    }
+    
+    table.grid-table.form-sec1 tr, table.grid-table.form-sec1 td {
+      display: block;
+      width: 100% !important;
+    }
+    table.grid-table.form-sec1 td {
+      border-bottom: none;
+    }
+    table.grid-table.form-sec1 tr {
+      border-bottom: 1px solid #000;
+    }
+
+    .photo-grid {
+      justify-content: center;
+    }
+
+    .btn-bar {
+      flex-direction: column;
+    }
+    .btn {
+      width: 100%;
+    }
+  }
+
+  /* =========================================================
+     MODUL CETAK / PDF
+     ========================================================= */
+  @media print{
+    @page {
+      margin: 10mm;
+    }
+    body{ background:#fff; padding:0; }
+    .sheet{ border:none; padding:0; width:100%; max-width:100%; }
+    
+    .btn-bar, .btn-sm, .action-col, th.action-col, td.action-col, .btn-del-row, .modal-overlay, .btn-clear-sig {
+      display: none !important;
+      visibility: hidden !important;
+      width: 0 !important;
+      height: 0 !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      border: none !important;
+      font-size: 0 !important;
+    }
+    
+    table.grid-table { display: table !important; width: 100% !important; }
+    table.grid-table tr { display: table-row !important; border: none !important; page-break-inside: avoid; }
+    table.grid-table td { display: table-cell !important; border: 1px solid #000 !important; }
+    table.grid-table th { background-color:transparent !important; border: 1px solid #000 !important; }
+    
+    input, select, textarea { border: none !important; padding:0 !important; -webkit-appearance: none; appearance: none; }
+    
+    .photo-grid { display: flex !important; flex-wrap: wrap !important; page-break-inside: avoid; }
+    .photo-item { page-break-inside: avoid; }
+    .photo-box { border:1px solid #000 !important; }
+    .sig-canvas-wrapper { border: none !important; background: transparent !important; }
+    .signature-container { page-break-inside: avoid; }
+    .table-responsive { overflow-x: visible !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="sheet">
+
+  <!-- JUDUL UTAMA -->
+  <div style="text-align: center; font-weight: bold; font-size: 11pt; margin-bottom: 15px;">
+    Kuesioner Wawancara Pemantauan Ikan Jenis Asing Invasif<br>
+    Informasi Jenis Ikan pada Lokasi Sentra Budidaya
+  </div>
+
+  <!-- INFORMASI RESPONDEN -->
+  <div class="sec-title">
+    Data personal responden
+  </div>
+
+  <table class="grid-table form-sec1">
+    <tr>
+      <td style="width:50%;">
+        <strong>1. Nama:</strong><br>
+        <input type="text" id="resp_nama">
+      </td>
+      <td style="width:50%;">
+        <strong>2. Umur (Tahun):</strong><br>
+        <input type="number" id="resp_umur" placeholder="(tahun)">
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <strong>3. Alamat:</strong><br>
+        <input type="text" id="resp_alamat">
+      </td>
+      <td>
+        <strong>4. Pekerjaan:</strong><br>
+        <input type="text" id="resp_pekerjaan">
+      </td>
+    </tr>
+  </table>
+
+  <!-- DAFTAR PERTANYAAN WAWANCARA (SENTRA BUDIDAYA) -->
+  <div style="margin-top:15px;" class="table-responsive">
+    <table class="grid-table">
+      <thead>
+        <tr>
+          <th style="width:35px;">No</th>
+          <th style="width:45%;">Pertanyaan</th>
+          <th>Jawaban</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="center">1</td>
+          <td>Sejak kapan usaha budidaya didirikan?</td>
+          <td>
+            <input type="text" id="q1" placeholder="Masukkan tahun/periode">
+          </td>
+        </tr>
+        <tr>
+          <td class="center" rowspan="2">2</td>
+          <td>Apakah jenis yang dibudidayakan termasuk bersifat invasif?</td>
+          <td>
+            <select class="q-inp" id="q2_a">
+              <option value="">-- Pilih --</option>
+              <option value="ada">ada</option>
+              <option value="tidak ada">tidak ada</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td>Jika ada, sebutkan jenis, kisaran jumlah, ukuran dan harganya</td>
+          <td>
+            <textarea id="q2_b" placeholder="Sebutkan jenis, jumlah, ukuran, dan harga"></textarea>
+          </td>
+        </tr>
+        <tr>
+          <td class="center">3</td>
+          <td>Apakah jenis yang dibudidayakan termasuk Ikan Asli atau Introduksi?</td>
+          <td>
+            <select class="q-inp" id="q3">
+              <option value="">-- Pilih --</option>
+              <option value="Ikan Asli">Ikan Asli</option>
+              <option value="Introduksi">Introduksi</option>
+              <option value="Keduanya">Keduanya</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td class="center" rowspan="2">4</td>
+          <td>Apakah ada izin budidaya jenis tersebut?</td>
+          <td>
+            <select class="q-inp" id="q4_a">
+              <option value="">-- Pilih --</option>
+              <option value="ada">ada</option>
+              <option value="tidak ada">tidak ada</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td>Jika ada sebutkan instansi pemberi izin</td>
+          <td>
+            <input type="text" id="q4_b" placeholder="Sebutkan nama instansi">
+          </td>
+        </tr>
+        <tr>
+          <td class="center">5</td>
+          <td>Mengapa dilakukan kegiatan budidaya jenis tersebut? Jelaskan</td>
+          <td>
+            <textarea id="q5" placeholder="Alasan/penjelasan kegiatan budidaya"></textarea>
+          </td>
+        </tr>
+        <tr>
+          <td class="center">6</td>
+          <td>Seberapa besar peluang ikan budidaya tersebut lepas ke perairan umum? Jelaskan alasannya:</td>
+          <td>
+            <select class="q-inp" id="q6_a" style="margin-bottom: 5px;">
+              <option value="">-- Pilih Peluang --</option>
+              <option value="peluang kecil">peluang kecil</option>
+              <option value="peluang besar">peluang besar</option>
+            </select>
+            <textarea id="q6_b" placeholder="Alasan peluang lepas..."></textarea>
+          </td>
+        </tr>
+        <tr>
+          <td class="center">7</td>
+          <td>Berasal darimana sajakah konsumen yang membeli hasil perikanan budidaya di tempat saudara?</td>
+          <td>
+            <textarea id="q7" placeholder="Sebutkan daerah/asal konsumen"></textarea>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- DOKUMENTASI FOTO SIMPLE -->
+  <div class="sec-title">Foto Dokumentasi</div>
+  
+  <div class="photo-grid" id="photoList"></div>
+  <button type="button" class="btn btn-sm action-col" id="btnAddPhoto">+ Upload Foto Dokumentasi</button>
+
+  <div class="footer-note">
+    Keterangan: *) coret yang tidak perlu
+  </div>
+
+  <br>
+  <!-- TEMPAT, TANGGAL & TANDA TANGAN KETUA TIM -->
+  <div style="width:100%; text-align:right; margin-top:20px;">
+    <div class="signature-container">
+      <div style="margin-bottom:8px;">
+        <input type="text" id="ttd_tempat" placeholder="Tempat" style="width: 100px; text-align: right; border-bottom: 1px dotted #000;">, 
+        <input type="date" id="ttd_tanggal" style="width: 130px; border-bottom: 1px dotted #000;">
+      </div>
+      Ketua Tim<br>
+      <div class="sig-canvas-wrapper">
+        <canvas id="sigCanvas" width="260" height="120"></canvas>
+      </div>
+      <button type="button" class="btn-sm action-col btn-clear-sig" id="btnClearSig" style="margin-bottom:4px;">Bersihkan TTD</button><br>
+      ( <input type="text" id="nama_ketua_tim" placeholder="Nama Ketua Tim" style="width: 200px; text-align: center; border-bottom: 1px dotted #000;"> )
+    </div>
+  </div>
+
+</div>
+
+<!-- CONTROLS -->
+<div class="btn-bar">
+  <button type="button" class="btn btn-success" id="btnOpenDrafts">📁 Lihat / Buka Draf</button>
+  <button type="button" class="btn" id="btnSave">💾 Simpan Draf Baru</button>
+  <button type="button" class="btn btn-primary" onclick="window.print()">Cetak / Simpan PDF</button>
+</div>
+
+<!-- MODAL BUKA DRAF -->
+<div class="modal-overlay" id="draftModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 style="margin:0;">Daftar Draf Tersimpan</h3>
+      <button type="button" id="btnCloseModal" style="cursor:pointer;">✕</button>
+    </div>
+    <div id="draftListContainer"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const DRAFTS_KEY = 'form_wawancara_sentra_budidaya_drafts';
+
+  // Set default tanggal hari ini
+  document.getElementById('ttd_tanggal').valueAsDate = new Date();
+
+  // LOGIK TANDA TANGAN INTERAKTIF (CANVAS)
+  const canvas = document.getElementById('sigCanvas');
+  const ctx = canvas.getContext('2d');
+  let isDrawing = false;
+
+  ctx.strokeStyle = '#000000';
+  ctx.lineWidth = 2;
+  ctx.lineCap = 'round';
+
+  function getPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    return {
+      x: clientX - rect.left,
+      y: clientY - rect.top
+    };
+  }
+
+  function startDrawing(e) {
+    isDrawing = true;
+    const pos = getPos(e);
+    ctx.beginPath();
+    ctx.moveTo(pos.x, pos.y);
+  }
+
+  function draw(e) {
+    if (!isDrawing) return;
+    e.preventDefault();
+    const pos = getPos(e);
+    ctx.lineTo(pos.x, pos.y);
+    ctx.stroke();
+  }
+
+  function stopDrawing() {
+    isDrawing = false;
+  }
+
+  canvas.addEventListener('mousedown', startDrawing);
+  canvas.addEventListener('mousemove', draw);
+  canvas.addEventListener('mouseup', stopDrawing);
+  canvas.addEventListener('mouseleave', stopDrawing);
+
+  canvas.addEventListener('touchstart', startDrawing);
+  canvas.addEventListener('touchmove', draw);
+  canvas.addEventListener('touchend', stopDrawing);
+
+  document.getElementById('btnClearSig').onclick = () => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  };
+
+  // LOGIK FOTO DOKUMENTASI
+  const photoList = document.getElementById('photoList');
+  function addPhotoBlock(data = {}){
+    const id = 'img_input_' + Date.now() + Math.random().toString(36).substr(2,4);
+    const div = document.createElement('div');
+    div.className = 'photo-item';
+    div.innerHTML = `
+      <input type="file" accept="image/*" id="${id}" style="display:none;">
+      <label for="${id}" class="photo-box ${data.img ? 'has-img' : ''}">
+        <span class="photo-hint">+ Upload Foto</span>
+        <img src="${data.img || ''}" alt="Foto Dokumentasi">
+      </label>
+      <button type="button" class="btn-sm action-col btn-del-row" style="color:red; margin-top:5px; border:none; background:none; cursor:pointer;" onclick="this.closest('.photo-item').remove()">✕ Hapus</button>
+    `;
+
+    const fileInp = div.querySelector(`#${id}`);
+    const box = div.querySelector('.photo-box');
+    const img = div.querySelector('img');
+
+    fileInp.onchange = (e) => {
+      const file = e.target.files[0];
+      if(file){
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          img.src = ev.target.result;
+          box.classList.add('has-img');
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+    photoList.appendChild(div);
+  }
+  document.getElementById('btnAddPhoto').onclick = () => addPhotoBlock();
+
+  // KELOLA DRAF (MULTI DRAFT LOGIC)
+  function getStoredDrafts(){
+    return JSON.parse(localStorage.getItem(DRAFTS_KEY) || '[]');
+  }
+
+  document.getElementById('btnSave').onclick = () => {
+    const namaResp = document.getElementById('resp_nama').value.trim();
+    
+    const draftTitle = prompt("Masukkan nama/judul draf ini:", namaResp ? `Budidaya - ${namaResp}` : `Draf Budidaya ${new Date().toLocaleString('id-ID')}`);
+    if(draftTitle === null) return;
+
+    // Ambil jawaban pertanyaan sentra budidaya
+    const qAnswers = {
+      q1: document.getElementById('q1').value,
+      q2_a: document.getElementById('q2_a').value,
+      q2_b: document.getElementById('q2_b').value,
+      q3: document.getElementById('q3').value,
+      q4_a: document.getElementById('q4_a').value,
+      q4_b: document.getElementById('q4_b').value,
+      q5: document.getElementById('q5').value,
+      q6_a: document.getElementById('q6_a').value,
+      q6_b: document.getElementById('q6_b').value,
+      q7: document.getElementById('q7').value
+    };
+
+    const currentDraft = {
+      id: 'draft_' + Date.now(),
+      title: draftTitle || 'Draf Tanpa Nama',
+      timestamp: new Date().toLocaleString('id-ID'),
+      data: {
+        resp_nama: document.getElementById('resp_nama').value,
+        resp_umur: document.getElementById('resp_umur').value,
+        resp_alamat: document.getElementById('resp_alamat').value,
+        resp_pekerjaan: document.getElementById('resp_pekerjaan').value,
+        questions: qAnswers,
+        photos: Array.from(photoList.children).map(div => ({
+          img: div.querySelector('img').src
+        })),
+        ttd_tempat: document.getElementById('ttd_tempat').value,
+        ttd_tanggal: document.getElementById('ttd_tanggal').value,
+        ketua: document.getElementById('nama_ketua_tim').value,
+        signature: canvas.toDataURL()
+      }
+    };
+
+    const drafts = getStoredDrafts();
+    drafts.unshift(currentDraft);
+    try {
+      localStorage.setItem(DRAFTS_KEY, JSON.stringify(drafts));
+      alert('Draf berhasil disimpan!');
+    } catch(e) {
+      alert('Gagal menyimpan draf. Kemungkinan ukuran foto terlalu besar.');
+    }
+  };
+
+  // MODAL DAFTAR DRAF
+  const modal = document.getElementById('draftModal');
+  document.getElementById('btnOpenDrafts').onclick = () => {
+    renderDraftList();
+    modal.style.display = 'flex';
+  };
+  document.getElementById('btnCloseModal').onclick = () => {
+    modal.style.display = 'none';
+  };
+
+  function renderDraftList(){
+    const container = document.getElementById('draftListContainer');
+    const drafts = getStoredDrafts();
+    container.innerHTML = '';
+
+    if(drafts.length === 0){
+      container.innerHTML = '<p style="text-align:center; color:#666;">Belum ada draf tersimpan.</p>';
+      return;
+    }
+
+    drafts.forEach((item, index) => {
+      const div = document.createElement('div');
+      div.className = 'draft-item';
+      div.innerHTML = `
+        <div class="draft-item-info">
+          <strong>${item.title}</strong><br>
+          <small style="color:#666;">Disimpan pada: ${item.timestamp}</small>
+        </div>
+        <div>
+          <button type="button" class="btn btn-sm btn-success btn-load" data-index="${index}">Buka</button>
+          <button type="button" class="btn btn-sm btn-del" data-index="${index}" style="color:red; border-color:red;">Hapus</button>
+        </div>
+      `;
+      container.appendChild(div);
+    });
+
+    container.querySelectorAll('.btn-load').forEach(btn => {
+      btn.onclick = (e) => {
+        const idx = e.target.getAttribute('data-index');
+        loadDataToForm(drafts[idx].data);
+        modal.style.display = 'none';
+        alert(`Draf "${drafts[idx].title}" berhasil dimuat.`);
+      };
+    });
+
+    container.querySelectorAll('.btn-del').forEach(btn => {
+      btn.onclick = (e) => {
+        const idx = e.target.getAttribute('data-index');
+        if(confirm(`Yakin ingin menghapus draf "${drafts[idx].title}"?`)){
+          drafts.splice(idx, 1);
+          localStorage.setItem(DRAFTS_KEY, JSON.stringify(drafts));
+          renderDraftList();
+        }
+      };
+    });
+  }
+
+  function loadDataToForm(data){
+    photoList.innerHTML = '';
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    document.getElementById('resp_nama').value = data.resp_nama || '';
+    document.getElementById('resp_umur').value = data.resp_umur || '';
+    document.getElementById('resp_alamat').value = data.resp_alamat || '';
+    document.getElementById('resp_pekerjaan').value = data.resp_pekerjaan || '';
+    document.getElementById('ttd_tempat').value = data.ttd_tempat || '';
+    document.getElementById('ttd_tanggal').value = data.ttd_tanggal || '';
+    document.getElementById('nama_ketua_tim').value = data.ketua || '';
+
+    if(data.questions){
+      Object.keys(data.questions).forEach(key => {
+        const el = document.getElementById(key);
+        if(el) el.value = data.questions[key];
+      });
+    }
+
+    if(data.photos && data.photos.length > 0){
+      data.photos.forEach(ph => addPhotoBlock(ph));
+    } else {
+      addPhotoBlock();
+    }
+
+    if(data.signature){
+      const img = new Image();
+      img.onload = () => {
+        ctx.drawImage(img, 0, 0);
+      };
+      img.src = data.signature;
+    }
+  }
+
+  // Inisialisasi awal
+  addPhotoBlock();
+
+})();
+</script>
+
+</body>
+</html>
