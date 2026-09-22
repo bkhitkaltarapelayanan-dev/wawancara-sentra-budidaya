@@ -67,6 +67,11 @@
   }
   input:focus, select:focus, textarea:focus{outline:1px solid #666;}
 
+  /* KELAS KHUSUS HALAMAN FOTO DOKUMENTASI */
+  .photo-section-page {
+    /* Kosong di tampilan layar, diberi page-break saat cetak */
+  }
+
   /* FOTO DOKUMENTASI SIMPLE GRID */
   .photo-grid {
     display: flex;
@@ -95,7 +100,7 @@
   .photo-box img{
     width:100%;
     height:100%;
-    object-fit: contain; /* Diperbarui agar foto pas, tidak terpotong atau terdistorsi */
+    object-fit: contain;
     display:none;
   }
   .photo-box.has-img img{display:block;}
@@ -253,6 +258,12 @@
     body{ background:#fff; padding:0; }
     .sheet{ border:none; padding:0; width:100%; max-width:100%; }
     
+    /* Menerapkan page break sebelum bagian foto dokumentasi saat dicetak */
+    .photo-section-page {
+      page-break-before: always;
+      break-before: page;
+    }
+
     .btn-bar, .btn-sm, .action-col, th.action-col, td.action-col, .btn-del-row, .modal-overlay, .btn-clear-sig {
       display: none !important;
       visibility: hidden !important;
@@ -412,30 +423,32 @@
     </table>
   </div>
 
-  <!-- DOKUMENTASI FOTO SIMPLE -->
-  <div class="sec-title">Foto Dokumentasi</div>
-  
-  <div class="photo-grid" id="photoList"></div>
-  <button type="button" class="btn btn-sm action-col" id="btnAddPhoto">+ Upload Foto Dokumentasi</button>
+  <!-- BAGIAN FOTO DOKUMENTASI DENGAN PAGE BREAK -->
+  <div class="photo-section-page">
+    <div class="sec-title">Foto Dokumentasi</div>
+    
+    <div class="photo-grid" id="photoList"></div>
+    <button type="button" class="btn btn-sm action-col" id="btnAddPhoto">+ Upload Foto Dokumentasi</button>
 
-  <div class="footer-note">
-    Keterangan: *) coret yang tidak perlu
-  </div>
+    <div class="footer-note">
+      Keterangan: *) coret yang tidak perlu
+    </div>
 
-  <br>
-  <!-- TEMPAT, TANGGAL & TANDA TANGAN KETUA TIM -->
-  <div style="width:100%; text-align:right; margin-top:20px;">
-    <div class="signature-container">
-      <div style="margin-bottom:8px;">
-        <input type="text" id="ttd_tempat" placeholder="Tempat" style="width: 100px; text-align: right; border-bottom: 1px dotted #000;">, 
-        <input type="date" id="ttd_tanggal" style="width: 130px; border-bottom: 1px dotted #000;">
+    <br>
+    <!-- TEMPAT, TANGGAL & TANDA TANGAN KETUA TIM -->
+    <div style="width:100%; text-align:right; margin-top:20px;">
+      <div class="signature-container">
+        <div style="margin-bottom:8px;">
+          <input type="text" id="ttd_tempat" placeholder="Tempat" style="width: 100px; text-align: right; border-bottom: 1px dotted #000;">, 
+          <input type="date" id="ttd_tanggal" style="width: 130px; border-bottom: 1px dotted #000;">
+        </div>
+        Ketua Tim<br>
+        <div class="sig-canvas-wrapper">
+          <canvas id="sigCanvas" width="260" height="120"></canvas>
+        </div>
+        <button type="button" class="btn-sm action-col btn-clear-sig" id="btnClearSig" style="margin-bottom:4px;">Bersihkan TTD</button><br>
+        ( <input type="text" id="nama_ketua_tim" placeholder="Nama Ketua Tim" style="width: 200px; text-align: center; border-bottom: 1px dotted #000;"> )
       </div>
-      Ketua Tim<br>
-      <div class="sig-canvas-wrapper">
-        <canvas id="sigCanvas" width="260" height="120"></canvas>
-      </div>
-      <button type="button" class="btn-sm action-col btn-clear-sig" id="btnClearSig" style="margin-bottom:4px;">Bersihkan TTD</button><br>
-      ( <input type="text" id="nama_ketua_tim" placeholder="Nama Ketua Tim" style="width: 200px; text-align: center; border-bottom: 1px dotted #000;"> )
     </div>
   </div>
 
