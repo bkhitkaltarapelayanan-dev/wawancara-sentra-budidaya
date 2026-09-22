@@ -95,7 +95,7 @@
   .photo-box img{
     width:100%;
     height:100%;
-    object-fit:cover;
+    object-fit: contain; /* Diperbarui agar foto pas, tidak terpotong atau terdistorsi */
     display:none;
   }
   .photo-box.has-img img{display:block;}
@@ -461,7 +461,57 @@
 
 <script>
 (function(){
-  const DRAFTS_KEY = 'form_wawancara_sentra_budidaya_drafts';
+  // INISIALISASI INDEXEDDB
+  const DB_NAME = 'FormWawancaraSentraBudidayaDB';
+  const STORE_NAME = 'drafts';
+  const DB_VERSION = 1;
+
+  function openDB() {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open(DB_NAME, DB_VERSION);
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => resolve(request.result);
+      request.onupgradeneeded = (event) => {
+        const db = event.target.result;
+        if (!db.objectStoreNames.contains(STORE_NAME)) {
+          db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+        }
+      };
+    });
+  }
+
+  async function getAllDrafts() {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction(STORE_NAME, 'readonly');
+      const store = transaction.objectStore(STORE_NAME);
+      const request = store.getAll();
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  async function saveDraftToDB(draftObj) {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction(STORE_NAME, 'readwrite');
+      const store = transaction.objectStore(STORE_NAME);
+      const request = store.put(draftObj);
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  async function deleteDraftFromDB(id) {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction(STORE_NAME, 'readwrite');
+      const store = transaction.objectStore(STORE_NAME);
+      const request = store.delete(id);
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+  }
 
   // Set default tanggal hari ini
   document.getElementById('ttd_tanggal').valueAsDate = new Date();
@@ -551,12 +601,8 @@
   }
   document.getElementById('btnAddPhoto').onclick = () => addPhotoBlock();
 
-  // KELOLA DRAF (MULTI DRAFT LOGIC)
-  function getStoredDrafts(){
-    return JSON.parse(localStorage.getItem(DRAFTS_KEY) || '[]');
-  }
-
-  document.getElementById('btnSave').onclick = () => {
+  // KELOLA DRAF (INDEXEDDB LOGIC)
+  document.getElementById('btnSave').onclick = async () => {
     const namaResp = document.getElementById('resp_nama').value.trim();
     
     const draftTitle = prompt("Masukkan nama/judul draf ini:", namaResp ? `Budidaya - ${namaResp}` : `Draf Budidaya ${new Date().toLocaleString('id-ID')}`);
@@ -596,29 +642,27 @@
       }
     };
 
-    const drafts = getStoredDrafts();
-    drafts.unshift(currentDraft);
     try {
-      localStorage.setItem(DRAFTS_KEY, JSON.stringify(drafts));
-      alert('Draf berhasil disimpan!');
+      await saveDraftToDB(currentDraft);
+      alert('Draf berhasil disimpan ke IndexedDB!');
     } catch(e) {
-      alert('Gagal menyimpan draf. Kemungkinan ukuran foto terlalu besar.');
+      alert('Gagal menyimpan draf: ' + e.message);
     }
   };
 
   // MODAL DAFTAR DRAF
   const modal = document.getElementById('draftModal');
-  document.getElementById('btnOpenDrafts').onclick = () => {
-    renderDraftList();
+  document.getElementById('btnOpenDrafts').onclick = async () => {
+    await renderDraftList();
     modal.style.display = 'flex';
   };
   document.getElementById('btnCloseModal').onclick = () => {
     modal.style.display = 'none';
   };
 
-  function renderDraftList(){
+  async function renderDraftList(){
     const container = document.getElementById('draftListContainer');
-    const drafts = getStoredDrafts();
+    const drafts = await getAllDrafts();
     container.innerHTML = '';
 
     if(drafts.length === 0){
@@ -626,7 +670,10 @@
       return;
     }
 
-    drafts.forEach((item, index) => {
+    // Urutkan dari yang terbaru
+    drafts.sort((a, b) => b.id.localeCompare(a.id));
+
+    drafts.forEach((item) => {
       const div = document.createElement('div');
       div.className = 'draft-item';
       div.innerHTML = `
@@ -635,28 +682,33 @@
           <small style="color:#666;">Disimpan pada: ${item.timestamp}</small>
         </div>
         <div>
-          <button type="button" class="btn btn-sm btn-success btn-load" data-index="${index}">Buka</button>
-          <button type="button" class="btn btn-sm btn-del" data-index="${index}" style="color:red; border-color:red;">Hapus</button>
+          <button type="button" class="btn btn-sm btn-success btn-load" data-id="${item.id}">Buka</button>
+          <button type="button" class="btn btn-sm btn-del" data-id="${item.id}" style="color:red; border-color:red;">Hapus</button>
         </div>
       `;
       container.appendChild(div);
     });
 
     container.querySelectorAll('.btn-load').forEach(btn => {
-      btn.onclick = (e) => {
-        const idx = e.target.getAttribute('data-index');
-        loadDataToForm(drafts[idx].data);
-        modal.style.display = 'none';
-        alert(`Draf "${drafts[idx].title}" berhasil dimuat.`);
+      btn.onclick = async (e) => {
+        const id = e.target.getAttribute('data-id');
+        const drafts = await getAllDrafts();
+        const selected = drafts.find(d => d.id === id);
+        if(selected) {
+          loadDataToForm(selected.data);
+          modal.style.display = 'none';
+          alert(`Draf "${selected.title}" berhasil dimuat.`);
+        }
       };
     });
 
     container.querySelectorAll('.btn-del').forEach(btn => {
-      btn.onclick = (e) => {
-        const idx = e.target.getAttribute('data-index');
-        if(confirm(`Yakin ingin menghapus draf "${drafts[idx].title}"?`)){
-          drafts.splice(idx, 1);
-          localStorage.setItem(DRAFTS_KEY, JSON.stringify(drafts));
+      btn.onclick = async (e) => {
+        const id = e.target.getAttribute('data-id');
+        const drafts = await getAllDrafts();
+        const selected = drafts.find(d => d.id === id);
+        if(selected && confirm(`Yakin ingin menghapus draf "${selected.title}"?`)){
+          await deleteDraftFromDB(id);
           renderDraftList();
         }
       };
